@@ -4,6 +4,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -12,11 +14,14 @@ import java.net.Socket;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 
 class MyFrame  extends JFrame implements ActionListener, Runnable, WindowListener{
@@ -25,6 +30,11 @@ class MyFrame  extends JFrame implements ActionListener, Runnable, WindowListene
 	JTextField textField = new JTextField(20);
 	JTextField nickTextField = new JTextField(nickname, 20);
 	JButton connectButton = new JButton("接続");
+	JButton acquireButton = new JButton("サーバ情報取得");
+	JLabel IPLabel = new JLabel("IPアドレス");
+	JLabel PortLabel = new JLabel("ポート番号");
+	JTextField IPTextField = new JTextField("127.0.0.1", 10);
+	JTextField PortTextField = new JTextField("5000", 10);
 	JButton nickButton = new JButton("ニックネーム設定");
 	JTextArea textArea = new JTextArea(30, 20);
 	JTextArea entryTextArea = new JTextArea(5, 20);
@@ -32,12 +42,18 @@ class MyFrame  extends JFrame implements ActionListener, Runnable, WindowListene
 	JPanel panel = new JPanel();
 	JPanel panel2 = new JPanel();
 	JPanel panel3 = new JPanel();
-
+	JPanel panel4 = new JPanel();
 	
 	PrintWriter writer;
 	BufferedReader reader;
 	String message;
 	Socket socket = null;
+	String IP; //IPアドレスを格納する
+	int port; //ポート番号を格納する
+	JFileChooser chooser = new JFileChooser(); //他のファイルからサーバ情報（IPアドレスとポート番号）を取得するために使用
+	File fileChoose; //同上
+	FileReader fr; //同上
+	File file; //同上
 	
 	MyFrame(){
 		setTitle("チャット欄");
@@ -59,15 +75,29 @@ class MyFrame  extends JFrame implements ActionListener, Runnable, WindowListene
 		getContentPane().add(panel2);
 		//接続/接続解除ボタンをパネルに配置しコンテナに追加
 		panel3.setLayout(new FlowLayout());
+		panel3.add(acquireButton);
 		panel3.add(connectButton);
 		getContentPane().add(panel3);
+		//IPアドレス/ポート番号ボタンをパネルに配置しコンテナに追加
+		panel4.setLayout(new FlowLayout());
+		panel4.add(IPLabel);
+		panel4.add(IPTextField);
+		panel4.add(PortLabel);
+		panel4.add(PortTextField);
+		getContentPane().add(panel4);
 		//イベント設定
 		textArea.setEditable(false);
 		button.setEnabled(false);
 		connectButton.setEnabled(false);
+		acquireButton.setEnabled(false);
+		IPTextField.setEnabled(false);
+		PortTextField.setEnabled(false);
 		button.addActionListener(this);
 		connectButton.addActionListener(this);
+		acquireButton.addActionListener(this);
 		nickButton.addActionListener(this);
+		IPTextField.addActionListener(this);
+		PortTextField.addActionListener(this);
 		this.addWindowListener(this);
 		setSize(700,700);
 		setVisible(true);
@@ -85,6 +115,9 @@ class MyFrame  extends JFrame implements ActionListener, Runnable, WindowListene
 				nickname = nickTextField.getText();
 				nickButton.setText("ニックネーム変更");
 				connectButton.setEnabled(true);
+				acquireButton.setEnabled(true);
+				IPTextField.setEnabled(true);
+				PortTextField.setEnabled(true);
 				textArea.append("ニックネームを [" + nickname + "] に設定しました" + "\r\n");
 				textArea.setCaretPosition(textArea.getText().length());
 				nickButton.setEnabled(false);
@@ -99,6 +132,13 @@ class MyFrame  extends JFrame implements ActionListener, Runnable, WindowListene
 				connectButton.setText("接続解除");
 				button.setEnabled(true);
 				nickButton.setEnabled(true);
+				acquireButton.setEnabled(false);
+				IPTextField.setEnabled(false);
+				PortTextField.setEnabled(false);
+				IP = IPTextField.getText();
+				String p = PortTextField.getText();
+				port = Integer.parseInt(p);
+
 				connect();
 			} else if(connectButton.getText() == "接続解除") {
 				writer.println("[" + nickname + "] さんが退室しました");
@@ -106,11 +146,36 @@ class MyFrame  extends JFrame implements ActionListener, Runnable, WindowListene
 				connectButton.setText("接続");
 				button.setEnabled(false);
 				nickButton.setEnabled(false);
+				acquireButton.setEnabled(true);
+				IPTextField.setEnabled(true);
+				PortTextField.setEnabled(true);
 				try {
 					socket.close();
-					socket = null;
 				} catch (IOException e1) {
 					e1.printStackTrace();
+				}
+				socket = null;
+			}
+		}else if(e.getSource() == acquireButton) {
+			//他のファイルからサーバ情報（IPアドレスとポート番号）を取得する
+		    FileNameExtensionFilter filter = new FileNameExtensionFilter("テキストファイル(*.txt)", "txt");
+		    chooser.setFileFilter(filter);
+			if(chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) { //新ウィンドウを開き、「開く」ボタンが押された場合
+				fileChoose = chooser.getSelectedFile();
+				if(fileChoose != null) { //ファイルが選択されていれば文章を取得する ※//「取消」を押してもファイルが選択されていれば、選択されたことになる!!!!!!!!!!!!!!!!!!!!!!!!!!!
+					try {
+						 file = new File(fileChoose.getPath());
+						 fr = new FileReader(file);
+						 reader = new BufferedReader(fr);
+						 IPTextField.setText(reader.readLine());
+						 PortTextField.setText(reader.readLine());
+						 reader.close();
+					 }catch(IOException e1) {
+						 e1.printStackTrace();
+					 }
+				}else {
+					System.out.println("ファイルが選択されていません"); 
+					//preSentenceを更新すると、保存してないのに文章が変更されていてもなかったことになるので、preSentence = textArea.getText();は必要なし
 				}
 			}
 		}
@@ -126,46 +191,52 @@ class MyFrame  extends JFrame implements ActionListener, Runnable, WindowListene
      }
 	@Override
 	public void windowOpened(WindowEvent e) {
+		textArea.append("[" + nickname + "]" + " さん、チャットへようこそ" + "\r\n" + 
+				"チャットに参加するには、[ニックネーム設定ボタン]→[接続]を押します" + "\r\n" + 
+				"※複数行まとめて送れますが、他の人のメッセージと混線する可能性大なので１行ずつ送ることを推奨します※" + "\r\n" + 
+				"==========================================================================================" + "\r\n");
+		textArea.setCaretPosition(textArea.getText().length());
 	}
 
 	@Override
 	public void windowClosed(WindowEvent e) {
+		// TODO 自動生成されたメソッド・スタブ
 	}
 
 	@Override
 	public void windowIconified(WindowEvent e) {
+		// TODO 自動生成されたメソッド・スタブ	
 	}
 
 	@Override
 	public void windowDeiconified(WindowEvent e) {
+		// TODO 自動生成されたメソッド・スタブ
 	}
 
 	@Override
 	public void windowActivated(WindowEvent e) {
+		// TODO 自動生成されたメソッド・スタブ
 	}
 
 	@Override
 	public void windowDeactivated(WindowEvent e) {
-	}
-	
-	public void setUp() {
-		textArea.append("[" + nickname + "]" + " さん、チャットへようこそ" + "\r\n" + 
-						"チャットに参加するには、[ニックネーム設定ボタン]→[接続]を押します" + "\r\n" + 
-						"※複数行まとめて送れますが、他の人のメッセージと混線する可能性大なので１行ずつ送ることを推奨します※" + "\r\n" + 
-						"==========================================================================================" + "\r\n");
-		textArea.setCaretPosition(textArea.getText().length());
+		// TODO 自動生成されたメソッド・スタブ
 	}
 	
 	public void connect() {
 		try {
-		socket = new Socket("127.0.0.1", 5000);
+//		socket = new Socket("192.168.0.154", 5000);
+		socket = new Socket(IP, port);
 		writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
 		reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		writer.println("[" + nickname + "] さんがチャットに参加しました");
 		writer.flush();
 		System.out.println("ここまで来た");
 		} catch(Exception e) {
-			e.printStackTrace();
+			System.out.println(e);
+			System.out.println("connectメソッドでエラー");
+			textArea.append("接続できませんでした。" + "\r\n");
+			textArea.setCaretPosition(textArea.getText().length());
 		}
 	}
 	
@@ -177,6 +248,7 @@ class MyFrame  extends JFrame implements ActionListener, Runnable, WindowListene
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
+					// TODO 自動生成された catch ブロック
 					e.printStackTrace();
 				}
 			}
@@ -191,7 +263,7 @@ class MyFrame  extends JFrame implements ActionListener, Runnable, WindowListene
 						System.out.println("サーバから[" + message + "]" + "のチャットを受け取りました。");
 					}
 			}catch(Exception e) {
-				e.printStackTrace();
+				System.out.println(e);
 			}
 		}
 	}
@@ -201,7 +273,6 @@ class MyFrame  extends JFrame implements ActionListener, Runnable, WindowListene
 public class MultiChatClient {
 	public static void main(String[] args) {
 		MyFrame mcc = new MyFrame();
-		mcc.setUp();
 		Thread thread = new Thread(mcc);
 		thread.start();
 	}

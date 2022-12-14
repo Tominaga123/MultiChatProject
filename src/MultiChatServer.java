@@ -1,11 +1,88 @@
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Vector;
 
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+class ServerFrame extends JFrame implements ActionListener{
+
+	JLabel label1 = new JLabel("<html>ポート番号を入力し、作成ボタンを押してください。<br>クライアントに渡すサーバ情報ファイルを作成します<html>");
+	JLabel label2 = new JLabel("ポート番号");
+	static JTextField textField = new JTextField("5000", 10);
+	JButton button = new JButton("ファイル作成");
+	JPanel panel1 = new JPanel();
+	JPanel panel2 = new JPanel();
+	JPanel panel3 = new JPanel();
+	//IPアドレス、ポート番号の出力に使用
+	File file; 
+	FileWriter fw; 
+	PrintWriter pw;
+	BufferedWriter bw;
+	String path;
+	//flagが0の間（ファイル作成ボタンが押されるまで）ソケット生成しない
+	static int flag = 0;
+	
+	ServerFrame(){
+		setTitle("ファイル作成");
+		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+		getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
+		//ラベル1をパネルに配置しコンテナに追加
+		panel1.setLayout(new FlowLayout());
+		panel1.add(label1);
+		getContentPane().add(panel1);
+		//ラベル2とテキストフィールドをパネルに配置しコンテナに追加
+		panel2.setLayout(new FlowLayout());
+		panel2.add(label2);
+		panel2.add(textField);
+		getContentPane().add(panel2);
+		//ボタンをパネルに配置しコンテナに追加
+		panel3.setLayout(new FlowLayout());
+		panel3.add(button);
+		getContentPane().add(panel3);
+		//イベント設定
+		button.addActionListener(this);
+		//フレーム表示
+		setSize(500,200);
+		setVisible(true);
+	}
+
+	public void actionPerformed(ActionEvent e) {
+		try {
+			flag = 1;
+			InetAddress addr = InetAddress.getLocalHost();
+			file = new File("富永サーバ情報.txt");
+			path = file.getAbsolutePath();
+			file = new File(path);
+			fw = new FileWriter(file);
+			bw = new BufferedWriter(fw);
+			bw.write(addr.getHostAddress());
+			bw.newLine();
+			bw.write(textField.getText());
+			bw.flush();
+			bw.close();
+			System.out.println("富永サーバ情報ファイルに" + addr.getHostAddress() + "と" + textField.getText() + "を書き込みました");
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+		
+	}
+}
 
 class SubChatServer extends Thread{
 	Socket socket;
@@ -35,14 +112,14 @@ class SubChatServer extends Thread{
 					System.out.println("読み取ったのは" + chat);
 					talk(chat);
 				} catch(IOException e) {
-					System.out.println(e);
+					e.printStackTrace();
 					socket.close();
 					sub.remove(this);
 					return;
 				}
 			}
 		} catch (IOException e) {
-			System.out.println(e);
+			e.printStackTrace();
 		}
 	}
 	
@@ -62,15 +139,26 @@ class SubChatServer extends Thread{
 		    writer.flush();
 		    System.out.println(message + "を送りました");
 		} catch (IOException e) {
-		    System.err.println(e);
+			e.printStackTrace();
 		}
 	}
 }
 
-public class MultiChatServer {
+public class MultiChatServer{
 	public static void main(String[] args) {
+		new ServerFrame();
+		while(ServerFrame.flag == 0) {
+			System.out.println("サーバ情報ファイル作成待ち");
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		//サーバ情報ファイルが作成されたらポート番号を取得してクライアントからの接続を待つ
 		try {
-			ServerSocket severSocket = new ServerSocket(5000);
+			int port = Integer.parseInt(ServerFrame.textField.getText());
+			ServerSocket severSocket = new ServerSocket(port);
 			Socket socket = null;
 			while(true) {
 				socket = severSocket.accept();
@@ -82,4 +170,5 @@ public class MultiChatServer {
 			e.printStackTrace();
 		}
 	}
+
 }
