@@ -162,7 +162,7 @@ class MyFrame  extends JFrame implements ActionListener, Runnable, WindowListene
 		    chooser.setFileFilter(filter);
 			if(chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) { //新ウィンドウを開き、「開く」ボタンが押された場合
 				fileChoose = chooser.getSelectedFile();
-				if(fileChoose != null) { //ファイルが選択されていれば文章を取得する ※//「取消」を押してもファイルが選択されていれば、選択されたことになる!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				if(fileChoose != null) { 
 					try {
 						 file = new File(fileChoose.getPath());
 						 fr = new FileReader(file);
@@ -175,7 +175,7 @@ class MyFrame  extends JFrame implements ActionListener, Runnable, WindowListene
 					 }
 				}else {
 					System.out.println("ファイルが選択されていません"); 
-					//preSentenceを更新すると、保存してないのに文章が変更されていてもなかったことになるので、preSentence = textArea.getText();は必要なし
+					
 				}
 			}
 		}
@@ -200,32 +200,27 @@ class MyFrame  extends JFrame implements ActionListener, Runnable, WindowListene
 
 	@Override
 	public void windowClosed(WindowEvent e) {
-		// TODO 自動生成されたメソッド・スタブ
+
 	}
 
 	@Override
 	public void windowIconified(WindowEvent e) {
-		// TODO 自動生成されたメソッド・スタブ	
 	}
 
 	@Override
 	public void windowDeiconified(WindowEvent e) {
-		// TODO 自動生成されたメソッド・スタブ
 	}
 
 	@Override
 	public void windowActivated(WindowEvent e) {
-		// TODO 自動生成されたメソッド・スタブ
 	}
 
 	@Override
 	public void windowDeactivated(WindowEvent e) {
-		// TODO 自動生成されたメソッド・スタブ
 	}
 	
 	public void connect() {
 		try {
-//		socket = new Socket("192.168.0.154", 5000);
 		socket = new Socket(IP, port);
 		writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
 		reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -248,7 +243,6 @@ class MyFrame  extends JFrame implements ActionListener, Runnable, WindowListene
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
-					// TODO 自動生成された catch ブロック
 					e.printStackTrace();
 				}
 			}
