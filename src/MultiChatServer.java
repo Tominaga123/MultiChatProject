@@ -97,14 +97,22 @@ class ServerFrame extends JFrame implements ActionListener, WindowListener{
 				OnOffButton.setText("サーバ終了");
 			} else if(OnOffButton.getText() == "サーバ終了") {
 				flag = 2;
+				try {
 				SubChatServer.talk("サーバが終了しました");
+				}catch(NullPointerException e1) {
+					e1.printStackTrace();
+				}
 			}
 		}
 	}
 
 	public void windowClosing(WindowEvent e) {
 		flag = 2;
+		try {
 		SubChatServer.talk("サーバが終了しました");
+		}catch(NullPointerException e1) {
+			e1.printStackTrace();
+		}
 	}
 	
 	public void windowOpened(WindowEvent e) {}
