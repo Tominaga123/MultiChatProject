@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -94,17 +93,8 @@ class ServerFrame extends JFrame implements ActionListener{
 				System.out.println("サーバを起動しました");
 				OnOffButton.setText("サーバ終了");
 			} else if(OnOffButton.getText() == "サーバ終了") {
-				try {
-					Socket socket = new Socket(addr.getHostAddress(), Integer.parseInt(textField.getText()));
-					bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-					bw.write("サーバが終了しました");
-					bw.flush();
-					System.out.println("サーバを終了しました");
-					} catch(Exception e1) {
-						e1.printStackTrace();
-					}
-				
-				
+				flag = 2;
+				System.out.println("サーバを終了しました");
 			}
 		}
 	}
@@ -125,10 +115,15 @@ class SubChatServer extends Thread{
 	}
 
 	public void run() {
+		while(true) {
+			if(ServerFrame.flag == 2) {
+				talk("サーバが終了しました");
+				System.out.println("flag2サーバ終了開始");
+			}
 		try {
 			PrintWriter writer = new PrintWriter(socket.getOutputStream());
 			BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			while(true) {
+			while(ServerFrame.flag == 1) {
 				try {
 					String chat = reader.readLine();
 					if(chat == null) {
@@ -148,9 +143,25 @@ class SubChatServer extends Thread{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		}
 	}
 	
 	public void talk(String message) {
+		if(ServerFrame.flag == 2) {
+			try {
+				PrintWriter writer = new PrintWriter(socket.getOutputStream());
+				int i;
+				for ( i = 0; i < sub.size(); i++) {
+					SubChatServer t = (SubChatServer)sub.get(i);
+				    if (t.isAlive()) {
+					t.talkone(this, message); 
+				    }
+				}
+				System.exit(0);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 		for (int i = 0; i < sub.size(); i++) {
 			SubChatServer t = (SubChatServer)sub.get(i);
 		    if (t.isAlive()) {
