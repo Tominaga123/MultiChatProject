@@ -94,7 +94,7 @@ class ServerFrame extends JFrame implements ActionListener{
 				OnOffButton.setText("サーバ終了");
 			} else if(OnOffButton.getText() == "サーバ終了") {
 				flag = 2;
-				System.out.println("サーバを終了しました");
+				SubChatServer.talk("サーバが終了しました");
 			}
 		}
 	}
@@ -115,15 +115,10 @@ class SubChatServer extends Thread{
 	}
 
 	public void run() {
-		while(true) {
-			if(ServerFrame.flag == 2) {
-				talk("サーバが終了しました");
-				System.out.println("flag2サーバ終了開始");
-			}
 		try {
 			PrintWriter writer = new PrintWriter(socket.getOutputStream());
 			BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			while(ServerFrame.flag == 1) {
+			while(true) {
 				try {
 					String chat = reader.readLine();
 					if(chat == null) {
@@ -143,34 +138,23 @@ class SubChatServer extends Thread{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		}
 	}
 	
-	public void talk(String message) {
-		if(ServerFrame.flag == 2) {
-			try {
-				PrintWriter writer = new PrintWriter(socket.getOutputStream());
-				int i;
-				for ( i = 0; i < sub.size(); i++) {
-					SubChatServer t = (SubChatServer)sub.get(i);
-				    if (t.isAlive()) {
-					t.talkone(this, message); 
-				    }
-				}
-				System.exit(0);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		for (int i = 0; i < sub.size(); i++) {
+	public static void talk(String message) {
+		int i = 1;
+		for (i = 0; i < sub.size(); i++) {
 			SubChatServer t = (SubChatServer)sub.get(i);
 		    if (t.isAlive()) {
-			t.talkone(this, message); 
+		    	t.talkone(message); 
 		    }
+		}
+		if(ServerFrame.flag == 2 && i == sub.size()) {
+			System.out.println("サーバを終了します");
+			System.exit(0);
 		}
 		
 	}
-	public void talkone(SubChatServer talker, String message){
+	public void talkone(String message){
 		try {
 		    PrintWriter writer = new PrintWriter(socket.getOutputStream());
 			writer.println(message);
