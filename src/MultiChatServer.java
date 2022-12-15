@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -94,17 +93,8 @@ class ServerFrame extends JFrame implements ActionListener{
 				System.out.println("サーバを起動しました");
 				OnOffButton.setText("サーバ終了");
 			} else if(OnOffButton.getText() == "サーバ終了") {
-				try {
-					Socket socket = new Socket(addr.getHostAddress(), Integer.parseInt(textField.getText()));
-					bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-					bw.write("サーバが終了しました");
-					bw.flush();
-					System.out.println("サーバを終了しました");
-					} catch(Exception e1) {
-						e1.printStackTrace();
-					}
-				
-				
+				System.out.println("サーバを終了しました");
+				System.exit(0);
 			}
 		}
 	}
