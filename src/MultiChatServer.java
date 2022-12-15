@@ -42,7 +42,7 @@ class SubChatServer extends Thread{
 				}
 			}
 		} catch (IOException e) {
-			System.out.println(e);
+			e.printStackTrace();
 		}
 	}
 	
@@ -62,7 +62,7 @@ class SubChatServer extends Thread{
 		    writer.flush();
 		    System.out.println(message + "を送りました");
 		} catch (IOException e) {
-		    System.err.println(e);
+			e.printStackTrace();
 		}
 	}
 }
