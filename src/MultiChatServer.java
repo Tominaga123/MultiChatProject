@@ -1,6 +1,8 @@
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -20,7 +22,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-class ServerFrame extends JFrame implements ActionListener{
+class ServerFrame extends JFrame implements ActionListener, WindowListener{
 
 	JLabel label1 = new JLabel("<html>ポート番号を入力し、作成ボタンを押してください。<br>クライアントに渡すサーバ情報ファイルを作成します<html>");
 	JLabel label2 = new JLabel("ポート番号");
@@ -62,6 +64,7 @@ class ServerFrame extends JFrame implements ActionListener{
 		button.addActionListener(this);
 		OnOffButton.addActionListener(this);
 		OnOffButton.setEnabled(false);
+		this.addWindowListener(this);
 		//フレーム表示
 		setSize(500,200);
 		setVisible(true);
@@ -98,6 +101,18 @@ class ServerFrame extends JFrame implements ActionListener{
 			}
 		}
 	}
+
+	public void windowClosing(WindowEvent e) {
+		flag = 2;
+		SubChatServer.talk("サーバが終了しました");
+	}
+	
+	public void windowOpened(WindowEvent e) {}
+	public void windowClosed(WindowEvent e) {}
+	public void windowIconified(WindowEvent e) {}
+	public void windowDeiconified(WindowEvent e) {}
+	public void windowActivated(WindowEvent e) {}
+	public void windowDeactivated(WindowEvent e) {}
 	
 }
 

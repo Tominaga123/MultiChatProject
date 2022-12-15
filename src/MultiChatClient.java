@@ -198,26 +198,11 @@ class MyFrame  extends JFrame implements ActionListener, Runnable, WindowListene
 		textArea.setCaretPosition(textArea.getText().length());
 	}
 
-	@Override
-	public void windowClosed(WindowEvent e) {
-
-	}
-
-	@Override
-	public void windowIconified(WindowEvent e) {
-	}
-
-	@Override
-	public void windowDeiconified(WindowEvent e) {
-	}
-
-	@Override
-	public void windowActivated(WindowEvent e) {
-	}
-
-	@Override
-	public void windowDeactivated(WindowEvent e) {
-	}
+	public void windowClosed(WindowEvent e) {}
+	public void windowIconified(WindowEvent e) {}
+	public void windowDeiconified(WindowEvent e) {}
+	public void windowActivated(WindowEvent e) {}
+	public void windowDeactivated(WindowEvent e) {}
 	
 	public void connect() {
 		try {
@@ -248,17 +233,24 @@ class MyFrame  extends JFrame implements ActionListener, Runnable, WindowListene
 			}
 			System.out.println("抜けました");
 			try {
-					while(socket != null && socket.isConnected()) {
-						System.out.println("繋がってる");
-						message = reader.readLine();
-						System.out.println("メッセを受け取り");
-						textArea.append( message + "\r\n");
-						textArea.setCaretPosition(textArea.getText().length());
-						System.out.println("サーバから[" + message + "]" + "のチャットを受け取りました。");
-					}
+				while(socket != null && socket.isConnected()) {
+					System.out.println("繋がってる");
+					message = reader.readLine();
+					System.out.println("メッセを受け取り");
+					textArea.append( message + "\r\n");
+					textArea.setCaretPosition(textArea.getText().length());
+					System.out.println("サーバから[" + message + "]" + "のチャットを受け取りました。");
+				}
 			}catch(Exception e) {
-				System.out.println(e);
+				e.printStackTrace();
 			}
+//			try {
+//				socket.close();
+//				socket= null;
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
+//			System.out.println(socket != null);
 		}
 	}
 
