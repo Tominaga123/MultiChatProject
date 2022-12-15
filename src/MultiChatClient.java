@@ -213,10 +213,16 @@ class MyFrame  extends JFrame implements ActionListener, Runnable, WindowListene
 		writer.flush();
 		System.out.println("ここまで来た");
 		} catch(Exception e) {
-			System.out.println(e);
-			System.out.println("connectメソッドでエラー");
+			e.printStackTrace();
 			textArea.append("接続できませんでした。" + "\r\n");
 			textArea.setCaretPosition(textArea.getText().length());
+			connectButton.setText("接続");
+			button.setEnabled(false);
+			nickButton.setEnabled(false);
+			acquireButton.setEnabled(true);
+			IPTextField.setEnabled(true);
+			PortTextField.setEnabled(true);
+			socket = null;
 		}
 	}
 	
