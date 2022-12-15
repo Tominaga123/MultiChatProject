@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -26,6 +27,7 @@ class ServerFrame extends JFrame implements ActionListener{
 	JLabel label2 = new JLabel("ポート番号");
 	static JTextField textField = new JTextField("5000", 10);
 	JButton button = new JButton("ファイル作成");
+	JButton OnOffButton = new JButton("サーバ起動");
 	JPanel panel1 = new JPanel();
 	JPanel panel2 = new JPanel();
 	JPanel panel3 = new JPanel();
@@ -35,12 +37,13 @@ class ServerFrame extends JFrame implements ActionListener{
 	PrintWriter pw;
 	BufferedWriter bw;
 	String path;
+	InetAddress addr;
 	//flagが0の間（ファイル作成ボタンが押されるまで）ソケット生成しない
 	static int flag = 0;
 	
 	ServerFrame(){
 		setTitle("ファイル作成");
-		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
 		//ラベル1をパネルに配置しコンテナに追加
 		panel1.setLayout(new FlowLayout());
@@ -54,34 +57,58 @@ class ServerFrame extends JFrame implements ActionListener{
 		//ボタンをパネルに配置しコンテナに追加
 		panel3.setLayout(new FlowLayout());
 		panel3.add(button);
+		panel3.add(OnOffButton);
 		getContentPane().add(panel3);
-		//イベント設定
+		//イベント設定等
 		button.addActionListener(this);
+		OnOffButton.addActionListener(this);
+		OnOffButton.setEnabled(false);
 		//フレーム表示
 		setSize(500,200);
 		setVisible(true);
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		try {
-			flag = 1;
-			InetAddress addr = InetAddress.getLocalHost();
-			file = new File("富永サーバ情報.txt");
-			path = file.getAbsolutePath();
-			file = new File(path);
-			fw = new FileWriter(file);
-			bw = new BufferedWriter(fw);
-			bw.write(addr.getHostAddress());
-			bw.newLine();
-			bw.write(textField.getText());
-			bw.flush();
-			bw.close();
-			System.out.println("富永サーバ情報ファイルに" + addr.getHostAddress() + "と" + textField.getText() + "を書き込みました");
-		} catch (Exception e1) {
-			e1.printStackTrace();
+		if(e.getSource() == button) {
+			try {
+				addr = InetAddress.getLocalHost();
+				file = new File("富永サーバ情報.txt");
+				path = file.getAbsolutePath();
+				file = new File(path);
+				fw = new FileWriter(file);
+				bw = new BufferedWriter(fw);
+				bw.write(addr.getHostAddress());
+				bw.newLine();
+				bw.write(textField.getText());
+				bw.flush();
+				bw.close();
+				System.out.println("富永サーバ情報ファイルに" + addr.getHostAddress() + "と" + textField.getText() + "を書き込みました");
+				OnOffButton.setEnabled(true);
+				
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+		}else if(e.getSource() == OnOffButton) {
+			if(OnOffButton.getText() == "サーバ起動") {
+				flag = 1;
+				System.out.println("サーバを起動しました");
+				OnOffButton.setText("サーバ終了");
+			} else if(OnOffButton.getText() == "サーバ終了") {
+				try {
+					Socket socket = new Socket(addr.getHostAddress(), Integer.parseInt(textField.getText()));
+					bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+					bw.write("サーバが終了しました");
+					bw.flush();
+					System.out.println("サーバを終了しました");
+					} catch(Exception e1) {
+						e1.printStackTrace();
+					}
+				
+				
+			}
 		}
-		
 	}
+	
 }
 
 class SubChatServer extends Thread{
