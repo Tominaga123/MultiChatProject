@@ -243,14 +243,14 @@ class MyFrame  extends JFrame implements ActionListener, Runnable, WindowListene
 				}
 			}catch(Exception e) {
 				e.printStackTrace();
+				connectButton.setText("接続");
+				button.setEnabled(false);
+				nickButton.setEnabled(false);
+				acquireButton.setEnabled(true);
+				IPTextField.setEnabled(true);
+				PortTextField.setEnabled(true);
+				socket = null;
 			}
-//			try {
-//				socket.close();
-//				socket= null;
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			}
-//			System.out.println(socket != null);
 		}
 	}
 
