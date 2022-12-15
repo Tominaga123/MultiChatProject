@@ -71,7 +71,7 @@ class ServerFrame extends JFrame implements ActionListener{
 		if(e.getSource() == button) {
 			try {
 				addr = InetAddress.getLocalHost();
-				file = new File("富永サーバ情報.txt");
+				file = new File("サーバ情報.txt");
 				path = file.getAbsolutePath();
 				file = new File(path);
 				fw = new FileWriter(file);
@@ -81,7 +81,7 @@ class ServerFrame extends JFrame implements ActionListener{
 				bw.write(textField.getText());
 				bw.flush();
 				bw.close();
-				System.out.println("富永サーバ情報ファイルに" + addr.getHostAddress() + "と" + textField.getText() + "を書き込みました");
+				System.out.println("サーバ情報ファイルに" + addr.getHostAddress() + "と" + textField.getText() + "を書き込みました");
 				OnOffButton.setEnabled(true);
 				
 			} catch (Exception e1) {
